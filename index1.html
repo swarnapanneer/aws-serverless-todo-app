@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ToDo App</title>
+</head>
+
+<body>
+
+<h1>ToDo App</h1>
+
+<input type="text" id="taskInput" placeholder="Enter task">
+<button onclick="addTask()">Add</button>
+
+<ul id="todoList"></ul>
+
+<script>
+
+const API_URL = "https://t6hrppbng3.execute-api.us-east-1.amazonaws.com/prod/todos";
+
+async function loadTodos() {
+
+    const response = await fetch(API_URL);
+    const data = await response.json();
+
+    const list = document.getElementById("todoList");
+    list.innerHTML = "";
+
+    data.forEach(task => {
+
+        const li = document.createElement("li");
+
+        li.innerHTML =
+            task.title +
+            " <button onclick=\"deleteTask('" + task.taskId + "')\">Delete</button>";
+
+        list.appendChild(li);
+    });
+}
+
+async function addTask() {
+
+    const title = document.getElementById("taskInput").value;
+
+    await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ title: title })
+    });
+
+    document.getElementById("taskInput").value = "";
+
+    loadTodos();
+}
+
+async function deleteTask(taskId) {
+
+    await fetch(API_URL, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ taskId: taskId })
+    });
+
+    loadTodos();
+}
+
+loadTodos();
+
+</script>
+
+</body>
+</html>
